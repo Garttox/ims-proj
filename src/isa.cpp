@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <limits.h> // for INT_MIN and INT_MAX
 #include "simlib.h"
+#include "simlib3D.h"
 
 //TODO: print usage
 void usage() {
