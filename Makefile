@@ -1,5 +1,6 @@
 CC = g++
 CXXFLAGS = -std=c++11 -Wall
+CXXFLAGS += -lsimlib #simlib
 EXECUTABLE = isa
 ARCHIVE_NAME = 09_xtrlic02_xlukes07
 
