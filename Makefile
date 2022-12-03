@@ -1,6 +1,6 @@
 CC = g++
 CXXFLAGS = -std=c++11 -Wall
-CXXFLAGS += -lsimlib #simlib
+CXXFLAGS += -lsimlib  #simlib
 CXXFLAGS += -lm #math
 EXECUTABLE = ims
 ARCHIVE_NAME = 09_xtrlic02_xlukes07

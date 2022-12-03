@@ -103,7 +103,8 @@ int main(int argc, char *argv[]) {
     double angle;
     long conv;
     int altitude;
-    while ((opt = getopt(argc, argv, ":a:h:")) != -1) {
+    std::string output_file = "trajectory.dat"; // default output file
+    while ((opt = getopt(argc, argv, ":a:h:o:")) != -1) {
         switch(opt) {
             case 'a':
                 angle = strtod(optarg, &p);
@@ -124,6 +125,9 @@ int main(int argc, char *argv[]) {
                 }
                 altitude = conv;
                 break;
+            case 'o':
+                output_file = optarg;
+                break;
             case '?':
                 std::cerr << "Unknown option: " << optarg << std::endl;
                 return 1;
@@ -141,7 +145,7 @@ int main(int argc, char *argv[]) {
         error_usage();
     }
 
-    SetOutput("trajectory.dat");
+    SetOutput(output_file.data());
     Init(0, 1000);    // inicializace experimentu
     SetMethod("rkf5");
     SetAccuracy(1e-7);
