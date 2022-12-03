@@ -108,6 +108,7 @@ int main(int argc, char *argv[]) {
     long conv;
     int altitude;
     std::string output_file = "trajectory.dat"; // default output file
+    while ((opt = getopt(argc, argv, ":a:h:o:")) != -1) {
         switch(opt) {
             case 'a':
                 angle = strtod(optarg, &p);
@@ -127,6 +128,9 @@ int main(int argc, char *argv[]) {
                     error_usage();
                 }
                 altitude = conv;
+                break;
+            case 'o':
+                output_file = optarg;
                 break;
             case '?':
                 std::cerr << "Unknown option: " << optarg << std::endl;
