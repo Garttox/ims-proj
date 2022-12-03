@@ -96,16 +96,6 @@ void error_usage() {
     exit(1);
 }
 
-void error_exit(std::string message, int exit_code) {
-    std::cerr << message << std::endl;
-    exit(exit_code);
-}
-
-Projectile projectile(rotate_vector(Vec3D(launch_velocity, 0, 0), angle));
-
-void Sample() { projectile.Out(); };
-Sampler S(Sample,0.1);
-
 double handleArgument(char *optarg, char *p, int opt) {
     double val;
     val = strtod(optarg, &p);
@@ -116,9 +106,14 @@ double handleArgument(char *optarg, char *p, int opt) {
     return val;
 }
 
+Projectile projectile(rotate_vector(Vec3D(launch_velocity, 0, 0), angle));
+
+void Sample() { projectile.Out(); };
+Sampler S(Sample,0.1);
+
 int main(int argc, char *argv[]) {
     
-    if (argc < 5) {
+    if (argc < 13) {
         std::cerr << "Too few arguments" << std::endl;
         error_usage();
     }
@@ -138,28 +133,35 @@ int main(int argc, char *argv[]) {
      */
     Parameters parameters;
     std::string output_file = "trajectory.dat"; // default output file
+    int mandatoryArgsEncountered = 0;
     while ((opt = getopt(argc, argv, ":a:c:d:m:o:s:v:")) != -1) {
         switch(opt) {
             case 'a':
                 parameters.angle = handleArgument(optarg, p, opt);
+                mandatoryArgsEncountered++;
                 break;
             case 'c':
                 parameters.dragCoefficient = handleArgument(optarg, p, opt);
+                mandatoryArgsEncountered++;
                 break;
             case 'd':
                 parameters.density = handleArgument(optarg, p, opt);
+                mandatoryArgsEncountered++;
                 break;
             case 'm':
                 parameters.mass = handleArgument(optarg, p, opt);
+                mandatoryArgsEncountered++;
                 break;
             case 'o':
                 output_file = optarg;
                 break;
             case 's':
                 parameters.area = handleArgument(optarg, p, opt);
+                mandatoryArgsEncountered++;
                 break;
             case 'v':
                 parameters.velocity = handleArgument(optarg, p, opt);
+                mandatoryArgsEncountered++;
                 break;
             case ':':
                 std::cerr << "Missing argument for option: " << (char)optopt << std::endl;
@@ -172,6 +174,11 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    if (mandatoryArgsEncountered != 6) {
+        std::cerr << "Missing some of the required parameters" << std::endl;
+        error_usage();
+    }
+
     for(; optind < argc; optind++) {
         std::cerr << "Unrecognized argument: " << argv[optind] << std::endl;
         err_flag = true;
@@ -180,6 +187,7 @@ int main(int argc, char *argv[]) {
     if (err_flag) {
         error_usage();
     }
+
     parameters.printParameters();
     SetOutput(output_file.data());
     Init(0, 1000);    // inicializace experimentu
