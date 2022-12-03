@@ -80,9 +80,15 @@ public:
     };
 };
 
-//TODO: print usage
 void usage() {
-    std::cerr << "usage" << std::endl;
+    std::cout << "Usage: ./ims -a # -c # -d # -m # [-o filename] -s # -v #" << std::endl;
+    std::cout << "-a: howitzer firing angle" << std::endl;
+    std::cout << "-c: drag coefficient" << std::endl;
+    std::cout << "-d: air density" << std::endl;
+    std::cout << "-m: projectile mass" << std::endl;
+    std::cout << "-o: output file name" << std::endl;
+    std::cout << "-s: projectile cross-section area" << std::endl;
+    std::cout << "-v: initial projectile velocity" << std::endl;
 }
 
 void error_usage() {
