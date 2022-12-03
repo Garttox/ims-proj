@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
     double angle;
     long conv;
     int altitude;
-    while ((opt = getopt(argc, argv, ":a:h:")) != -1) {
+    std::string output_file = "trajectory.dat"; // default output file
         switch(opt) {
             case 'a':
                 angle = strtod(optarg, &p);
@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
         error_usage();
     }
 
-    SetOutput("trajectory.dat");
+    SetOutput(output_file.data());
     Init(0, 1000);    // inicializace experimentu
     SetMethod("rkf5");
     SetAccuracy(1e-7);
