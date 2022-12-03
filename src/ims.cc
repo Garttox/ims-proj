@@ -21,7 +21,7 @@ Vec3D rotate_vector(Vec3D vec, double angle) {
     double radians = (M_PI / 180) * angle;
     double x2 = cos(radians) * vec.x - sin(radians) * vec.y;
     double y2 = sin(radians) * vec.x + cos(radians) * vec.y;
-    Vec3D rotatedVec = Vec3D(x2, y2, 50);
+    Vec3D rotatedVec = Vec3D(x2, y2, 70);
     vec.printVec();
     return rotatedVec;
 }
@@ -35,44 +35,35 @@ const double drag_coefficient = 0.3;
 const double air_density = 0.037325;
 
 const double angle = 45;
-
+const Vec3D wind_speed(1,1,1);
+/*
+y'' = -drag * |y'| * y' / mass -g
+drag = 0.5 * drag_coef * cross_section * air_density
+*/
 class Projectile : ConditionDown{
-    //Integrator vx, vy, vg, yx, yy;
-    Integrator y0,y1,y2,y3,zv,zs;
+    Integrator vx, vy, vz, yx, yy, yz;
+    //Integrator y0,y1,y2,y3,zv,zs;
     Parameter drag;
-    Vec3D initialVelocity;
-    void Action() {
-        y1 = 0;
+    void Action() { // projectile touched "ground"
+        yy = 0; // correction
         Out();
         Stop();
     }
 public:
     Projectile(Vec3D initialVelocity) :
-        ConditionDown(y1),
-        /*initialVelocity(initialVelocity),
+        ConditionDown(yy),
         drag(0.5 * drag_coefficient * cross_section_area * air_density),
-        vy(-((drag * Sqrt(Pow(vy,2) + Pow(vx,2)) * vy)/mass)-gravitational_acceleration, initialVelocity.y),
-        vx(-((drag * Sqrt(Pow(vy,2) + Pow(vx,2)) * vx)/mass), initialVelocity.x),
         yx(vx, 0.0),
-        yy(vy, 0.0) {};*/
-        initialVelocity(initialVelocity),
-        drag(0.0046774),
-        y0(y2, 0.0),
-        y1(y3, 0.0),
-        zs(zv, 0.0),
-        zv((-drag * Sqrt(y2*y2*zv + y3*y3*zv) * zv )/ mass, initialVelocity.z),
-        y2((-drag * Sqrt(y2*y2*zv + y3*y3*zv) * y2 )/ mass, initialVelocity.x),
-        y3(((-drag * Sqrt(y2*y2*zv + y3*y3*zv) * y3) / mass) - gravitational_acceleration, initialVelocity.y) {};
+        yy(vy, 0.0),
+        yz(vz, 0.0),
+        vx((-drag * Sqrt(vx*vx + vy*vy + vz*vz) * wind_speed.x * vx) / mass, initialVelocity.x),
+        vy(((-drag * Sqrt(vx*vx + vy*vy + vz*vz) * wind_speed.y * vy) / mass) - gravitational_acceleration, initialVelocity.y),
+        vz((-drag * Sqrt(vx*vx + vy*vy + vz*vz) * wind_speed.z * vz) / mass, initialVelocity.z) {};
     void Out() {
         //Print("%g %g %g\n", yx.Value(), yy.Value(), vx.Value());    
-        Print("%g %g %g\n", y0.Value(), zs.Value(), y1.Value());    
+        Print("%g %g %g\n", yx.Value(), yz.Value(), yy.Value()); //print current position
     };
 };
-
-Projectile projectile(rotate_vector(Vec3D(launch_velocity, 0, 0), angle));
-
-void Sample() { projectile.Out(); }     // output
-Sampler S(Sample,0.1);
 
 //TODO: print usage
 void usage() {
@@ -88,6 +79,11 @@ void error_exit(std::string message, int exit_code) {
     std::cerr << message << std::endl;
     exit(exit_code);
 }
+
+Projectile projectile(rotate_vector(Vec3D(launch_velocity, 0, 0), angle));
+
+void Sample() { projectile.Out(); };
+Sampler S(Sample,0.1);
 
 int main(int argc, char *argv[]) {
     
