@@ -1,9 +1,24 @@
 #include <iostream>
 #include <getopt.h>
-#include <errno.h>
-#include <limits.h> // for INT_MIN and INT_MAX
 #include <math.h>
 #include "simlib.h"
+
+struct Parameters {
+    double angle;
+    double dragCoefficient;
+    double density;
+    double mass;
+    double area;
+    double velocity;
+    void printParameters() {
+        std::cout << "Angle: " << angle << std::endl;
+        std::cout << "Drag coefficient: " << dragCoefficient << std::endl;
+        std::cout << "Density: " << density << std::endl;
+        std::cout << "Mass: " << mass << std::endl;
+        std::cout << "Area: " << area << std::endl;
+        std::cout << "Velocity: " << velocity << std::endl;
+    }
+};
 
 struct Vec3D {
     double x;
@@ -85,6 +100,16 @@ Projectile projectile(rotate_vector(Vec3D(launch_velocity, 0, 0), angle));
 void Sample() { projectile.Out(); };
 Sampler S(Sample,0.1);
 
+double handleArgument(char *optarg, char *p, int opt) {
+    double val;
+    val = strtod(optarg, &p);
+    if (*p != '\0' || angle < 0) {
+		std::cerr << "Bad argument value for argument " << (char)opt << std::endl;
+        error_usage();
+	}
+    return val;
+}
+
 int main(int argc, char *argv[]) {
     
     if (argc < 5) {
@@ -94,39 +119,41 @@ int main(int argc, char *argv[]) {
 
     int opt;
     bool err_flag = false;
-    char *p;
+    char *p = NULL;
     /**
      * opts
      * a - howitzer firing angle
-     * h - howitzer altitude
+     * c - drag coefficient
+     * d - air density
+     * m - projectile mass
+     * o - output file name
+     * s - projectile cross-section area
+     * v - initial projectile velocity
      */
-    double angle;
-    long conv;
-    int altitude;
+    Parameters parameters;
     std::string output_file = "trajectory.dat"; // default output file
-    while ((opt = getopt(argc, argv, ":a:h:o:")) != -1) {
+    while ((opt = getopt(argc, argv, ":a:c:d:m:o:s:v:")) != -1) {
         switch(opt) {
             case 'a':
-                angle = strtod(optarg, &p);
-                if (*p != '\0' || angle < 0) {
-					std::cerr << "Bad \"-a\" argument value" << std::endl;
-                    error_usage();
-				}
+                parameters.angle = handleArgument(optarg, p, opt);
                 break;
-            case 'h':
-                conv = strtol(optarg, &p, 10);
-                if (*p != '\0' || errno != 0) {
-                    std::cerr << "Bad \"-h\" argument value" << std::endl;
-                    error_usage();
-                }
-                if (conv < INT_MIN || conv > INT_MAX) {
-                    std::cerr << "\"-h\" argument value out of integer bounds" << std::endl;
-                    error_usage();
-                }
-                altitude = conv;
+            case 'c':
+                parameters.dragCoefficient = handleArgument(optarg, p, opt);
+                break;
+            case 'd':
+                parameters.density = handleArgument(optarg, p, opt);
+                break;
+            case 'm':
+                parameters.mass = handleArgument(optarg, p, opt);
                 break;
             case 'o':
                 output_file = optarg;
+                break;
+            case 's':
+                parameters.area = handleArgument(optarg, p, opt);
+                break;
+            case 'v':
+                parameters.velocity = handleArgument(optarg, p, opt);
                 break;
             case '?':
                 std::cerr << "Unknown option: " << optarg << std::endl;
@@ -144,7 +171,7 @@ int main(int argc, char *argv[]) {
     if (err_flag) {
         error_usage();
     }
-
+    parameters.printParameters();
     SetOutput(output_file.data());
     Init(0, 1000);    // inicializace experimentu
     SetMethod("rkf5");
