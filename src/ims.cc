@@ -161,8 +161,11 @@ int main(int argc, char *argv[]) {
             case 'v':
                 parameters.velocity = handleArgument(optarg, p, opt);
                 break;
+            case ':':
+                std::cerr << "Missing argument for option: " << (char)optopt << std::endl;
+                return 1;
             case '?':
-                std::cerr << "Unknown option: " << optarg << std::endl;
+                std::cerr << "Unknown option: " << (char)optopt << std::endl;
                 return 1;
             default:
                 error_usage();
