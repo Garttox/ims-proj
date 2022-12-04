@@ -182,7 +182,7 @@ int main(int argc, char *argv[]) {
     Parameters parameters;
     std::string outputFile = "trajectory.dat"; // default output file
     int mandatoryArgsEncountered = 0;
-    while ((opt = getopt(argc, argv, ":a:c:d:m:o:s:v:")) != -1) {
+    while ((opt = getopt(argc, argv, ":a:c:m:o:s:t:v:")) != -1) {
         switch(opt) {
             case 'a':
                 parameters.angle = handleArgument(optarg, p, opt);
