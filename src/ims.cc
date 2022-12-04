@@ -77,7 +77,9 @@ double _temperatureK = celsiusToKelvin(0);
 double _waterVaporPressure = calculateWaterVaperPressure(_temperatureK, 0);
 Projectile projectile(_initialVelocity, _mass, _dragCoef, _crossSection, _temperatureK, _waterVaporPressure);
 
-void Sample() { projectile.Out(); };
+void Sample() {
+    projectile.Out(); 
+};
 Sampler S(Sample,0.1);
 
 int main(int argc, char *argv[]) {
