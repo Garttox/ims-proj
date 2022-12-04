@@ -9,7 +9,7 @@ compile:
 	@$(CC) -o $(EXECUTABLE) src/*.cc $(CXXFLAGS)
 
 run: compile
-	@./$(EXECUTABLE) -a 45 -h 0
+	@./$(EXECUTABLE) -a 20 -c 0.3 -m 43.2 -s 0.0765 -t 15 -v 250
 
 plot:
 	gnuplot plot.plt

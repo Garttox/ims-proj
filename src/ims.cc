@@ -41,34 +41,25 @@ Vec3D rotateVector(Vec3D vec, double angle) {
     return rotatedVec;
 }
 
-/*
-const double mass = 43.2; // projectile mass [kg]
-const double launch_velocity = 100; // projectile launch velocity [m/s]
-const double cross_section_area = 0.0765; // cross-section area of projectile [m^2]
-
-const double drag_coefficient = 0.3;
-const double air_density = 0.037325;
-
-const double angle = 45;
-const double crossSectionArea = 0.0765; // cross-section area of m107 projectile [m^2]*/
 const double gravitationalAcceleration = 9.80665;// gravitational acceleration
 const double molarMassOfAir = 0.0289644; // molar mass of dry air [kg/mol]
 const double universalGasConstant = 8.31423; // universal / ideal gas constant
 const double gasConstantDryAir = 287.05; // gas constant of dry air
 const double seaLevelPressure = 101325; // air pressure at sea level
+
 /*
 y'' = -drag * |y'| * y' / mass -g
 drag = 0.5 * drag_coef * cross_section * air_density
+air_density = airPressure/(gasConstantDryAir * temperatureK)
+airPressure = seaLevelPressure * exp((-gravitationalAcceleration * molarMassOfAir * y'')/(universalGasConstant * temperatureK))
 */
 class Projectile : ConditionDown{
-    Integrator vx, vy, vz, yx, yy, yz;
-    //Integrator y0,y1,y2,y3,zv,zs;
-    Parameter mass, dragCoef, crossSection, temperatureK;
+    Integrator vx, vy, vz; // projectile speed
+    Integrator yx, yy, yz; // projectile position
+    Parameter mass, dragCoef, crossSection, temperatureK; //constant simulation parameters
     Expression airPressure, airDensity, drag;
-    Parameter p0x, p0y, p0z;
-    Vec3D initialVelocity;
     void Action() { // projectile touched "ground"
-        yy = 0; // correction
+        yy = 0; // correction - if current iteration is <0, then correct height to 0
         Out();
         Stop();
     }
@@ -76,23 +67,16 @@ public:
     Projectile(Vec3D _initialVelocity, double _mass, double _dragCoef, double _crossSection, double _temperatureK) :
         ConditionDown(yy),
         mass(_mass), dragCoef(_dragCoef), crossSection(_crossSection), temperatureK(_temperatureK), // init const Parameters
-        p0x(_initialVelocity.x),
-        p0y(_initialVelocity.y),
-        p0z(_initialVelocity.z),
         airPressure(seaLevelPressure * Exp((-gravitationalAcceleration * molarMassOfAir * yy)/(universalGasConstant * temperatureK))),
         airDensity(airPressure/(gasConstantDryAir * temperatureK)),
-        //drag(0.5 * drag_coefficient * cross_section_area * air_density),
         drag(0.5 * dragCoef * crossSection * airDensity),
-        //drag(_drag),
-        initialVelocity(_initialVelocity),
         yx(vx, 0.0),
         yy(vy, 0.0),
         yz(vz, 0.0),
-        vx((-drag * Sqrt(vx*vx + vy*vy + vz*vz) * vx) / mass, p0x.Value()),
-        vy(((-drag * Sqrt(vx*vx + vy*vy + vz*vz) * vy) / mass) - gravitationalAcceleration, p0y.Value()),
-        vz((-drag * Sqrt(vx*vx + vy*vy + vz*vz) * vz) / mass, p0z.Value()) {};
+        vx((-drag * Sqrt(vx*vx + vy*vy + vz*vz) * vx) / mass, _initialVelocity.x),
+        vy(((-drag * Sqrt(vx*vx + vy*vy + vz*vz) * vy) / mass) - gravitationalAcceleration, _initialVelocity.y),
+        vz((-drag * Sqrt(vx*vx + vy*vy + vz*vz) * vz) / mass, _initialVelocity.z) {};
     void Out() {
-        //Print("%g %g %g\n", yx.Value(), yy.Value(), vx.Value());    
         Print("%g %g %g\n", yx.Value(), yz.Value(), yy.Value()); //print current position at sample time
     };
     void SetInitialVelocity(Vec3D _initialVelocity) {
