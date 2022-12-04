@@ -213,8 +213,6 @@ int main(int argc, char *argv[]) {
         errorUsage();
     }
 
-    parameters.printParameters();
-
     double dragConst = calculateDragConst(parameters.dragCoefficient, crossSectionArea, parameters.density);
     Vec3D initialVelocity(parameters.velocity, 0.0, 0.0);
     initialVelocity = rotateVector(initialVelocity, parameters.angle);
