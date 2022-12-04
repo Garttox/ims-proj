@@ -37,7 +37,7 @@ double celsiusToKelvin(double celsius) {
 double handleArgument(char *optarg, char *p, int opt) {
     double val;
     val = strtod(optarg, &p);
-    if (*p != '\0' || val < 0) {
+    if (*p != '\0' || (opt != 't' && val < 0)) { // Only temperature can be a negative number
 		std::cerr << "Bad argument value for argument " << (char)opt << std::endl;
         errorUsage();
 	}
