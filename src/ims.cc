@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <getopt.h>
+#include <math.h>
 #include "simlib.h"
 #include "util.cc"
 #include "vector.hh"
@@ -36,6 +37,25 @@ double celsiusToKelvin(double celsius) {
     return celsius + celsiusToKelvinShift;
 }
 
+//calculations taken from https://www.calctool.org/atmospheric-thermodynamics/air-density
+double calculateWaterVaperPressure(double tempK, double relativeHumidity) {
+    double tempC = tempK - 273.15;
+    double c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, p_t, E_st;
+    c0 = 0.99999683;
+    c1 = -0.90826951e-2;
+    c2 = 0.78736169e-4;
+    c3 = -0.61117958e-6;
+    c4 = 0.43884187e-8;
+    c5 = -0.29883885e-10;
+    c6 = 0.21874425e-12;
+    c7 = -0.17892321e-14;
+    c8 = 0.11112018e-16;
+    c9 = -0.30994571e-19;
+    p_t = c0 + tempC*(c1 + tempC*(c2 + tempC*(c3 + tempC*(c4 + tempC*(c5 + tempC*(c6 + tempC*(c7+ tempC*(c8 + tempC*c9))))))));
+    E_st = 6.1078/pow(p_t, 8);
+    return relativeHumidity * E_st;
+}
+
 double handleArgument(char *optarg, char *p, int opt) {
     double val;
     val = strtod(optarg, &p);
@@ -54,8 +74,8 @@ double _dragCoef = 0.3;
 double _mass = 43.2;
 double _crossSection = 0.0765;
 double _temperatureK = celsiusToKelvin(0);
-
-Projectile projectile(_initialVelocity, _mass, _dragCoef, _crossSection, _temperatureK);
+double _waterVaporPressure = calculateWaterVaperPressure(_temperatureK, 0);
+Projectile projectile(_initialVelocity, _mass, _dragCoef, _crossSection, _temperatureK, _waterVaporPressure);
 
 void Sample() { projectile.Out(); };
 Sampler S(Sample,0.1);
@@ -84,7 +104,7 @@ int main(int argc, char *argv[]) {
     Parameters parameters;
     std::string outputFile = "trajectory.dat"; // default output file
     int mandatoryArgsEncountered = 0;
-    while ((opt = getopt(argc, argv, ":a:c:m:o:s:t:v:")) != -1) {
+    while ((opt = getopt(argc, argv, ":a:c:h:m:o:s:t:v:")) != -1) {
         switch(opt) {
             case 'a':
                 parameters.angle = handleArgument(optarg, p, opt);
@@ -144,12 +164,14 @@ int main(int argc, char *argv[]) {
 
     Vec3D initialVelocity(parameters.velocity, 0.0, 0.0);
     double tempK = celsiusToKelvin(parameters.temperature);
+    double waterVaporPressure = calculateWaterVaperPressure(tempK, parameters.relativeHumidity);
     initialVelocity = rotateVector(initialVelocity, parameters.angle);
     projectile.SetDragCoef(parameters.dragCoefficient);
     projectile.SetInitialVelocity(initialVelocity);
     projectile.SetMass(parameters.mass);
     projectile.SetCrossSection(parameters.area);
     projectile.SetTemperatureK(tempK);
+    projectile.SetWaterVaporPressure(waterVaporPressure);
     SetOutput(outputFile.data());
     Init(0, 1000);    // init simulation
     SetMethod("rkf5");

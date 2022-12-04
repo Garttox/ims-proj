@@ -6,6 +6,7 @@
 
 #include "projectile.hh"
 
+// private
 void Projectile::Action() { // projectile touched "ground"
     yy = 0; // correction - if current iteration is <0, then correct height to 0
     Out();
@@ -20,11 +21,13 @@ void Projectile::Action() { // projectile touched "ground"
  * air_density = airPressure/(gasConstantDryAir * temperatureK)
  * airPressure = seaLevelPressure * exp((-gravitationalAcceleration * molarMassOfAir * y'')/(universalGasConstant * temperatureK))
  */
-Projectile::Projectile(Vec3D _initialVelocity, double _mass, double _dragCoef, double _crossSection, double _temperatureK) :
+Projectile::Projectile(Vec3D _initialVelocity, double _mass, double _dragCoef, double _crossSection, double _temperatureK, double _waterVaporPressure) :
     ConditionDown(yy),
     mass(_mass), dragCoef(_dragCoef), crossSection(_crossSection), temperatureK(_temperatureK), // init const Parameters
+    waterVaporPressure(_waterVaporPressure),
     airPressure(seaLevelPressure * Exp((-gravitationalAcceleration * molarMassOfAir * yy)/(universalGasConstant * temperatureK))),
-    airDensity(airPressure/(gasConstantDryAir * temperatureK)),
+    //airDensity(airPressure/(gasConstantDryAir * temperatureK)),
+    airDensity((airPressure - waterVaporPressure)/(gasConstantDryAir*temperatureK) + waterVaporPressure/(gasConstantWaterVapor*temperatureK)),
     drag(0.5 * dragCoef * crossSection * airDensity),
     yx(vx, 0.0),
     yy(vy, 0.0),
@@ -52,3 +55,6 @@ void Projectile::SetCrossSection(double _crossSection) {
 void Projectile::SetTemperatureK(double _temperatureK) {
     temperatureK = _temperatureK;
 };
+void Projectile::SetWaterVaporPressure(double _waterVaporPressure) {
+    waterVaporPressure = _waterVaporPressure;
+}
