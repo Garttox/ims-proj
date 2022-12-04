@@ -2,11 +2,12 @@ CC = g++
 CXXFLAGS = -std=c++11 -Wall
 CXXFLAGS += -lsimlib  #simlib
 CXXFLAGS += -lm #math
+SRCFILES = src/ims.cc src/vector.cc src/projectile.cc
 EXECUTABLE = ims
 ARCHIVE_NAME = 09_xtrlic02_xlukes07
 
 compile:
-	@$(CC) -o $(EXECUTABLE) src/*.cc $(CXXFLAGS)
+	@$(CC) -o $(EXECUTABLE) $(SRCFILES) $(CXXFLAGS)
 
 run: compile
 	@./$(EXECUTABLE) -a 20 -c 0.3 -m 43.2 -s 0.0765 -t 15 -v 250

@@ -1,7 +1,9 @@
 #include <iostream>
 #include <getopt.h>
-#include <math.h>
 #include "simlib.h"
+#include "util.cc"
+#include "vector.hh"
+#include "projectile.hh"
 
 struct Parameters {
     double angle;
@@ -20,103 +22,16 @@ struct Parameters {
     }
 };
 
-struct Vec3D {
-    double x;
-    double y;
-    double z;
-    Vec3D(double x, double y, double z) : 
-        x(x), y(y), z(z)
-        {};
-    void printVec() {
-        std::cout << "x:" << x << "  y:" << y << std::endl;
-    }
-};
-
-Vec3D rotateVector(Vec3D vec, double angle) {
-    double radians = (M_PI / 180) * angle;
-    double x2 = cos(radians) * vec.x - sin(radians) * vec.y;
-    double y2 = sin(radians) * vec.x + cos(radians) * vec.y;
-    Vec3D rotatedVec = Vec3D(x2, y2, 0);
-    vec.printVec();
-    return rotatedVec;
-}
-
-const double gravitationalAcceleration = 9.80665;// gravitational acceleration
-const double molarMassOfAir = 0.0289644; // molar mass of dry air [kg/mol]
-const double universalGasConstant = 8.31423; // universal / ideal gas constant
-const double gasConstantDryAir = 287.05; // gas constant of dry air
-const double seaLevelPressure = 101325; // air pressure at sea level
-
 /*
 y'' = -drag * |y'| * y' / mass -g
 drag = 0.5 * drag_coef * cross_section * air_density
 air_density = airPressure/(gasConstantDryAir * temperatureK)
 airPressure = seaLevelPressure * exp((-gravitationalAcceleration * molarMassOfAir * y'')/(universalGasConstant * temperatureK))
 */
-class Projectile : ConditionDown{
-    Integrator vx, vy, vz; // projectile speed
-    Integrator yx, yy, yz; // projectile position
-    Parameter mass, dragCoef, crossSection, temperatureK; //constant simulation parameters
-    Expression airPressure, airDensity, drag;
-    void Action() { // projectile touched "ground"
-        yy = 0; // correction - if current iteration is <0, then correct height to 0
-        Out();
-        Stop();
-    }
-public:
-    Projectile(Vec3D _initialVelocity, double _mass, double _dragCoef, double _crossSection, double _temperatureK) :
-        ConditionDown(yy),
-        mass(_mass), dragCoef(_dragCoef), crossSection(_crossSection), temperatureK(_temperatureK), // init const Parameters
-        airPressure(seaLevelPressure * Exp((-gravitationalAcceleration * molarMassOfAir * yy)/(universalGasConstant * temperatureK))),
-        airDensity(airPressure/(gasConstantDryAir * temperatureK)),
-        drag(0.5 * dragCoef * crossSection * airDensity),
-        yx(vx, 0.0),
-        yy(vy, 0.0),
-        yz(vz, 0.0),
-        vx((-drag * Sqrt(vx*vx + vy*vy + vz*vz) * vx) / mass, _initialVelocity.x),
-        vy(((-drag * Sqrt(vx*vx + vy*vy + vz*vz) * vy) / mass) - gravitationalAcceleration, _initialVelocity.y),
-        vz((-drag * Sqrt(vx*vx + vy*vy + vz*vz) * vz) / mass, _initialVelocity.z) {};
-    void Out() {
-        Print("%g %g %g\n", yx.Value(), yz.Value(), yy.Value()); //print current position at sample time
-    };
-    void SetInitialVelocity(Vec3D _initialVelocity) {
-        vx.Init(_initialVelocity.x);
-        vy.Init(_initialVelocity.y);
-        vz.Init(_initialVelocity.z);
-    };
-    void SetDragCoef(double _dragCoef) {
-        dragCoef = _dragCoef;
-    };
-    void SetMass(double _mass) {
-        mass = _mass;
-    };
-    void SetCrossSection(double _crossSection) {
-        crossSection = _crossSection;
-    };
-    void SetTemperatureK(double _temperatureK) {
-        temperatureK = _temperatureK;
-    };
-};
 
 double celsiusToKelvin(double celsius) {
     double celsiusToKelvinShift = 273.15;
     return celsius + celsiusToKelvinShift;
-}
-
-void usage() {
-    std::cout << "Usage: ./ims -a # -c # -m # [-o filename] -s # -t # -v #" << std::endl;
-    std::cout << "-a: howitzer firing angle [°]" << std::endl;
-    std::cout << "-c: drag coefficient" << std::endl;
-    std::cout << "-m: projectile mass [kg]" << std::endl;
-    std::cout << "-o: output file name" << std::endl;
-    std::cout << "-s: projectile cross-section area [m^2]" << std::endl;
-    std::cout << "-t: temperature [°C]" << std::endl;
-    std::cout << "-v: initial projectile velocity [m/s]" << std::endl;
-}
-
-void errorUsage() {
-    usage();
-    exit(1);
 }
 
 double handleArgument(char *optarg, char *p, int opt) {
@@ -137,7 +52,7 @@ double _dragCoef = 0.3;
 double _mass = 43.2;
 double _crossSection = 0.0765;
 double _temperatureK = celsiusToKelvin(0);
-//Projectile(Vec3D _initialVelocity, double _mass, double _dragCoef, double _crossSection, double _temperatureK) :
+
 Projectile projectile(_initialVelocity, _mass, _dragCoef, _crossSection, _temperatureK);
 
 void Sample() { projectile.Out(); };
@@ -229,7 +144,7 @@ int main(int argc, char *argv[]) {
     projectile.SetCrossSection(parameters.area);
     projectile.SetTemperatureK(tempK);
     SetOutput(outputFile.data());
-    Init(0, 1000);    // inicializace experimentu
+    Init(0, 1000);    // init simulation
     SetMethod("rkf5");
     SetAccuracy(1e-7);
     Run();
