@@ -32,7 +32,7 @@ struct Vec3D {
     }
 };
 
-Vec3D rotate_vector(Vec3D vec, double angle) {
+Vec3D rotateVector(Vec3D vec, double angle) {
     double radians = (M_PI / 180) * angle;
     double x2 = cos(radians) * vec.x - sin(radians) * vec.y;
     double y2 = sin(radians) * vec.x + cos(radians) * vec.y;
@@ -41,16 +41,18 @@ Vec3D rotate_vector(Vec3D vec, double angle) {
     return rotatedVec;
 }
 
+/*
 const double mass = 43.2; // projectile mass [kg]
 const double launch_velocity = 100; // projectile launch velocity [m/s]
 const double cross_section_area = 0.0765; // cross-section area of projectile [m^2]
-const double gravitational_acceleration = 9.80665;// gravitational acceleration
 
 const double drag_coefficient = 0.3;
 const double air_density = 0.037325;
 
-const double angle = 45;
-const Vec3D wind_speed(1,1,1);
+const double angle = 45;*/
+const double crossSectionArea = 0.0765; // cross-section area of m107 projectile [m^2]
+const double gravitationalAcceleration = 9.80665;// gravitational acceleration
+
 /*
 y'' = -drag * |y'| * y' / mass -g
 drag = 0.5 * drag_coef * cross_section * air_density
@@ -58,27 +60,45 @@ drag = 0.5 * drag_coef * cross_section * air_density
 class Projectile : ConditionDown{
     Integrator vx, vy, vz, yx, yy, yz;
     //Integrator y0,y1,y2,y3,zv,zs;
-    Parameter drag;
+    Parameter drag, mass;
+    Vec3D initialVelocity;
     void Action() { // projectile touched "ground"
         yy = 0; // correction
         Out();
         Stop();
     }
 public:
-    Projectile(Vec3D initialVelocity) :
+    Projectile(Vec3D _initialVelocity, double _drag, double _mass) :
         ConditionDown(yy),
-        drag(0.5 * drag_coefficient * cross_section_area * air_density),
+        mass(_mass),
+        //drag(0.5 * drag_coefficient * cross_section_area * air_density),
+        //drag(0.5 * dragCoef * crossSection * airDensity),
+        drag(_drag),
+        initialVelocity(_initialVelocity),
         yx(vx, 0.0),
         yy(vy, 0.0),
         yz(vz, 0.0),
-        vx((-drag * Sqrt(vx*vx + vy*vy + vz*vz) * wind_speed.x * vx) / mass, initialVelocity.x),
-        vy(((-drag * Sqrt(vx*vx + vy*vy + vz*vz) * wind_speed.y * vy) / mass) - gravitational_acceleration, initialVelocity.y),
-        vz((-drag * Sqrt(vx*vx + vy*vy + vz*vz) * wind_speed.z * vz) / mass, initialVelocity.z) {};
+        vx((-drag * Sqrt(vx*vx + vy*vy + vz*vz) * vx) / mass, initialVelocity.x),
+        vy(((-drag * Sqrt(vx*vx + vy*vy + vz*vz) * vy) / mass) - gravitationalAcceleration, initialVelocity.y),
+        vz((-drag * Sqrt(vx*vx + vy*vy + vz*vz) * vz) / mass, initialVelocity.z) {};
     void Out() {
         //Print("%g %g %g\n", yx.Value(), yy.Value(), vx.Value());    
         Print("%g %g %g\n", yx.Value(), yz.Value(), yy.Value()); //print current position
     };
+    void SetInitialVelocity(Vec3D _initialVelocity) {
+        initialVelocity = _initialVelocity;
+    };
+    void SetDrag(double _drag) {
+        drag = _drag;
+    };
+    void SetMass(double _mass) {
+        mass = _mass;
+    };
 };
+
+double calculateDragConst(double dragCoef, double crossSection, double airDensity) {
+    return 0.5 * dragCoef * crossSection * airDensity;
+}
 
 void usage() {
     std::cout << "Usage: ./ims -a # -c # -d # -m # [-o filename] -s # -v #" << std::endl;
@@ -106,7 +126,12 @@ double handleArgument(char *optarg, char *p, int opt) {
     return val;
 }
 
-Projectile projectile(rotate_vector(Vec3D(launch_velocity, 0, 0), angle));
+double _angle = 45;
+double _launch_velocity = 827; // [m/s]
+Vec3D _initialVelocity = rotateVector(Vec3D(_launch_velocity, 0, 0), _angle); //
+double _drag = 0.01;
+double _mass = 43.2;
+Projectile projectile(_initialVelocity, _drag, _mass);
 
 void Sample() { projectile.Out(); };
 Sampler S(Sample,0.1);
@@ -189,6 +214,13 @@ int main(int argc, char *argv[]) {
     }
 
     parameters.printParameters();
+
+    double dragConst = calculateDragConst(parameters.dragCoefficient, crossSectionArea, parameters.density);
+    Vec3D initialVelocity(parameters.velocity, 0.0, 0.0);
+    initialVelocity = rotateVector(initialVelocity, parameters.angle);
+    projectile.SetDrag(dragConst);
+    projectile.SetInitialVelocity(initialVelocity);
+    projectile.SetMass(parameters.mass);
     SetOutput(output_file.data());
     Init(0, 1000);    // inicializace experimentu
     SetMethod("rkf5");
