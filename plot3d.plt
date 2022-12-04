@@ -9,7 +9,7 @@ set zlabel "[m]"
 set grid
 set xyplane at 0
 
-splot "trajectory.dat" u 1:2:3 with lines, \
+splot "trajectory.dat" u 1:2:3 with lines title "trajectory 1", \
     "trajectory1.dat" u 1:2:3 with lines
 
 
