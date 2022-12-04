@@ -111,7 +111,7 @@ void usage() {
     std::cout << "-v: initial projectile velocity" << std::endl;
 }
 
-void error_usage() {
+void errorUsage() {
     usage();
     exit(1);
 }
@@ -121,7 +121,7 @@ double handleArgument(char *optarg, char *p, int opt) {
     val = strtod(optarg, &p);
     if (*p != '\0' || val < 0) {
 		std::cerr << "Bad argument value for argument " << (char)opt << std::endl;
-        error_usage();
+        errorUsage();
 	}
     return val;
 }
@@ -140,11 +140,11 @@ int main(int argc, char *argv[]) {
     
     if (argc < 13) {
         std::cerr << "Too few arguments" << std::endl;
-        error_usage();
+        errorUsage();
     }
 
     int opt;
-    bool err_flag = false;
+    bool errFlag = false;
     char *p = NULL;
     /**
      * opts
@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
      * v - initial projectile velocity
      */
     Parameters parameters;
-    std::string output_file = "trajectory.dat"; // default output file
+    std::string outputFile = "trajectory.dat"; // default output file
     int mandatoryArgsEncountered = 0;
     while ((opt = getopt(argc, argv, ":a:c:d:m:o:s:v:")) != -1) {
         switch(opt) {
@@ -178,7 +178,7 @@ int main(int argc, char *argv[]) {
                 mandatoryArgsEncountered++;
                 break;
             case 'o':
-                output_file = optarg;
+                outputFile = optarg;
                 break;
             case 's':
                 parameters.area = handleArgument(optarg, p, opt);
@@ -195,22 +195,22 @@ int main(int argc, char *argv[]) {
                 std::cerr << "Unknown option: " << (char)optopt << std::endl;
                 return 1;
             default:
-                error_usage();
+                errorUsage();
         }
     }
 
     if (mandatoryArgsEncountered != 6) {
         std::cerr << "Missing some of the required parameters" << std::endl;
-        error_usage();
+        errorUsage();
     }
 
     for(; optind < argc; optind++) {
         std::cerr << "Unrecognized argument: " << argv[optind] << std::endl;
-        err_flag = true;
+        errFlag = true;
     }
 
-    if (err_flag) {
-        error_usage();
+    if (errFlag) {
+        errorUsage();
     }
 
     parameters.printParameters();
@@ -221,7 +221,7 @@ int main(int argc, char *argv[]) {
     projectile.SetDrag(dragConst);
     projectile.SetInitialVelocity(initialVelocity);
     projectile.SetMass(parameters.mass);
-    SetOutput(output_file.data());
+    SetOutput(outputFile.data());
     Init(0, 1000);    // inicializace experimentu
     SetMethod("rkf5");
     SetAccuracy(1e-7);
