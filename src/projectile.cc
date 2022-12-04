@@ -1,3 +1,9 @@
+/**
+ * @file projectile.cc
+ * @authors Michal trlica - xtrlic02
+ *          František Lukeš - xlukes07
+ */
+
 #include "projectile.hh"
 
 void Projectile::Action() { // projectile touched "ground"
@@ -6,6 +12,14 @@ void Projectile::Action() { // projectile touched "ground"
     Stop();
 }
 // public
+/**
+ * Projectile simulation equations
+ * 
+ * y'' = -drag * |y'| * y' / mass -g
+ * drag = 0.5 * drag_coef * cross_section * air_density
+ * air_density = airPressure/(gasConstantDryAir * temperatureK)
+ * airPressure = seaLevelPressure * exp((-gravitationalAcceleration * molarMassOfAir * y'')/(universalGasConstant * temperatureK))
+ */
 Projectile::Projectile(Vec3D _initialVelocity, double _mass, double _dragCoef, double _crossSection, double _temperatureK) :
     ConditionDown(yy),
     mass(_mass), dragCoef(_dragCoef), crossSection(_crossSection), temperatureK(_temperatureK), // init const Parameters

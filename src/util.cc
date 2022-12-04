@@ -1,3 +1,10 @@
+/**
+ * @file util.cc
+ * @authors Michal trlica - xtrlic02
+ *          František Lukeš - xlukes07
+ * @brief Utility print and exit functions
+ */
+
 #include <iostream>
 
 /**

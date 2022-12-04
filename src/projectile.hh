@@ -1,3 +1,10 @@
+/**
+ * @file projectile.hh
+ * @authors Michal trlica - xtrlic02
+ *          František Lukeš - xlukes07
+ * @brief Projectile simulation object
+ */
+
 #ifndef PROJECTILE_HH
 #define PROJECTILE_HH
 

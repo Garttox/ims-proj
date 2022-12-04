@@ -1,3 +1,9 @@
+/**
+ * @file vector.cc
+ * @authors Michal trlica - xtrlic02
+ *          František Lukeš - xlukes07
+ */
+
 #include <math.h>
 #include "vector.hh"
 

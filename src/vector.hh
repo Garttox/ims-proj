@@ -1,3 +1,10 @@
+/**
+ * @file vector.hh
+ * @authors Michal trlica - xtrlic02
+ *          František Lukeš - xlukes07
+ * @brief Simple 3D vector
+ */
+
 #ifndef VECTOR_HH
 #define VECTOR_HH
 

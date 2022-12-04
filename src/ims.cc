@@ -1,3 +1,10 @@
+/**
+ * @file ims.cc
+ * @authors Michal trlica - xtrlic02
+ *          František Lukeš - xlukes07
+ * @brief Program entry point, parsing arguments
+ */
+
 #include <iostream>
 #include <getopt.h>
 #include "simlib.h"
@@ -21,13 +28,6 @@ struct Parameters {
         std::cout << "Velocity: " << velocity << std::endl;
     }
 };
-
-/*
-y'' = -drag * |y'| * y' / mass -g
-drag = 0.5 * drag_coef * cross_section * air_density
-air_density = airPressure/(gasConstantDryAir * temperatureK)
-airPressure = seaLevelPressure * exp((-gravitationalAcceleration * molarMassOfAir * y'')/(universalGasConstant * temperatureK))
-*/
 
 double celsiusToKelvin(double celsius) {
     double celsiusToKelvinShift = 273.15;
