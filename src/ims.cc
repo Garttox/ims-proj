@@ -52,7 +52,10 @@ const double air_density = 0.037325;
 const double angle = 45;
 const double crossSectionArea = 0.0765; // cross-section area of m107 projectile [m^2]*/
 const double gravitationalAcceleration = 9.80665;// gravitational acceleration
-
+const double molarMassOfAir = 0.0289644; // molar mass of dry air [kg/mol]
+const double universalGasConstant = 8.31423; // universal / ideal gas constant
+const double gasConstantDryAir = 287.05; // gas constant of dry air
+const double seaLevelPressure = 101325; // air pressure at sea level
 /*
 y'' = -drag * |y'| * y' / mass -g
 drag = 0.5 * drag_coef * cross_section * air_density
@@ -60,7 +63,8 @@ drag = 0.5 * drag_coef * cross_section * air_density
 class Projectile : ConditionDown{
     Integrator vx, vy, vz, yx, yy, yz;
     //Integrator y0,y1,y2,y3,zv,zs;
-    Parameter drag, mass;
+    Parameter mass, dragCoef, crossSection, temperatureK;
+    Expression airPressure, airDensity, drag;
     Parameter p0x, p0y, p0z;
     Vec3D initialVelocity;
     void Action() { // projectile touched "ground"
@@ -69,15 +73,17 @@ class Projectile : ConditionDown{
         Stop();
     }
 public:
-    Projectile(Vec3D _initialVelocity, double _drag, double _mass) :
+    Projectile(Vec3D _initialVelocity, double _mass, double _dragCoef, double _crossSection, double _temperatureK) :
         ConditionDown(yy),
-        mass(_mass),
+        mass(_mass), dragCoef(_dragCoef), crossSection(_crossSection), temperatureK(_temperatureK), // init const Parameters
         p0x(_initialVelocity.x),
         p0y(_initialVelocity.y),
         p0z(_initialVelocity.z),
+        airPressure(seaLevelPressure * Exp((-gravitationalAcceleration * molarMassOfAir * yy)/(universalGasConstant * temperatureK))),
+        airDensity(airPressure/(gasConstantDryAir * temperatureK)),
         //drag(0.5 * drag_coefficient * cross_section_area * air_density),
-        //drag(0.5 * dragCoef * crossSection * airDensity),
-        drag(_drag),
+        drag(0.5 * dragCoef * crossSection * airDensity),
+        //drag(_drag),
         initialVelocity(_initialVelocity),
         yx(vx, 0.0),
         yy(vy, 0.0),
@@ -87,24 +93,30 @@ public:
         vz((-drag * Sqrt(vx*vx + vy*vy + vz*vz) * vz) / mass, p0z.Value()) {};
     void Out() {
         //Print("%g %g %g\n", yx.Value(), yy.Value(), vx.Value());    
-        Print("%g %g %g\n", yx.Value(), yz.Value(), yy.Value()); //print current position
+        Print("%g %g %g\n", yx.Value(), yz.Value(), yy.Value()); //print current position at sample time
     };
     void SetInitialVelocity(Vec3D _initialVelocity) {
-        //initialVelocity = _initialVelocity;
         vx.Init(_initialVelocity.x);
         vy.Init(_initialVelocity.y);
         vz.Init(_initialVelocity.z);
     };
-    void SetDrag(double _drag) {
-        drag = _drag;
+    void SetDragCoef(double _dragCoef) {
+        dragCoef = _dragCoef;
     };
     void SetMass(double _mass) {
         mass = _mass;
     };
+    void SetCrossSection(double _crossSection) {
+        crossSection = _crossSection;
+    };
+    void SetTemperatureK(double _temperatureK) {
+        temperatureK = _temperatureK;
+    };
 };
 
-double calculateDragConst(double dragCoef, double crossSection, double airDensity) {
-    return 0.5 * dragCoef * crossSection * airDensity;
+double celsiusToKelvin(double celsius) {
+    double celsiusToKelvinShift = 273.15;
+    return celsius + celsiusToKelvinShift;
 }
 
 void usage() {
