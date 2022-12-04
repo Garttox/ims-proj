@@ -11,6 +11,12 @@ compile:
 run: compile
 	@./$(EXECUTABLE) -a 45 -h 0
 
+plot:
+	gnuplot plot.plt
+
+plot3d:
+	gnuplot plot3d.plt
+
 clean:
 	@rm -r $(EXECUTABLE) $(ARCHIVE_NAME).zip
 
