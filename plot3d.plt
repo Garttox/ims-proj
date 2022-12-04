@@ -2,6 +2,10 @@
 set xrange [0:1000]
 set yrange [0:1000]
 set zrange [0:1000]
+set xlabel "[m]"
+set ylabel "[m]"
+set zlabel "[m]"
+
 set grid
 set xyplane at 0
 
