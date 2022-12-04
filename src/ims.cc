@@ -15,6 +15,7 @@
 struct Parameters {
     double angle;
     double dragCoefficient;
+    double relativeHumidity;
     double mass;
     double area;
     double temperature;
@@ -22,6 +23,7 @@ struct Parameters {
     void printParameters() {
         std::cout << "Angle: " << angle << std::endl;
         std::cout << "Drag coefficient: " << dragCoefficient << std::endl;
+        std::cout << "relative humidity: " << relativeHumidity << std::endl;
         std::cout << "Mass: " << mass << std::endl;
         std::cout << "Area: " << area << std::endl;
         std::cout << "Temperature: " << area << std::endl;
@@ -72,6 +74,7 @@ int main(int argc, char *argv[]) {
      * opts
      * a - howitzer firing angle
      * c - drag coefficient
+     * h - relative huminity
      * m - projectile mass
      * o - output file name
      * s - projectile cross-section area
@@ -89,6 +92,10 @@ int main(int argc, char *argv[]) {
                 break;
             case 'c':
                 parameters.dragCoefficient = handleArgument(optarg, p, opt);
+                mandatoryArgsEncountered++;
+                break;
+            case 'h':
+                parameters.relativeHumidity = handleArgument(optarg, p, opt);
                 mandatoryArgsEncountered++;
                 break;
             case 'm':
@@ -121,7 +128,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    if (mandatoryArgsEncountered != 6) {
+    if (mandatoryArgsEncountered != 7) {
         std::cerr << "Missing some of the required parameters" << std::endl;
         errorUsage();
     }
