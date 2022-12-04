@@ -119,7 +119,7 @@ void error_usage() {
 double handleArgument(char *optarg, char *p, int opt) {
     double val;
     val = strtod(optarg, &p);
-    if (*p != '\0' || angle < 0) {
+    if (*p != '\0' || val < 0) {
 		std::cerr << "Bad argument value for argument " << (char)opt << std::endl;
         error_usage();
 	}
