@@ -49,8 +49,8 @@ const double cross_section_area = 0.0765; // cross-section area of projectile [m
 const double drag_coefficient = 0.3;
 const double air_density = 0.037325;
 
-const double angle = 45;*/
-const double crossSectionArea = 0.0765; // cross-section area of m107 projectile [m^2]
+const double angle = 45;
+const double crossSectionArea = 0.0765; // cross-section area of m107 projectile [m^2]*/
 const double gravitationalAcceleration = 9.80665;// gravitational acceleration
 
 /*
@@ -213,7 +213,7 @@ int main(int argc, char *argv[]) {
         errorUsage();
     }
 
-    double dragConst = calculateDragConst(parameters.dragCoefficient, crossSectionArea, parameters.density);
+    double dragConst = calculateDragConst(parameters.dragCoefficient, parameters.area, parameters.density);
     Vec3D initialVelocity(parameters.velocity, 0.0, 0.0);
     initialVelocity = rotateVector(initialVelocity, parameters.angle);
     projectile.SetDrag(dragConst);
