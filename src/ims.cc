@@ -145,12 +145,16 @@ double handleArgument(char *optarg, char *p, int opt) {
     return val;
 }
 
+//default parameters
 double _angle = 45;
 double _launch_velocity = 827; // [m/s]
 Vec3D _initialVelocity = rotateVector(Vec3D(_launch_velocity, 0, 0), _angle); //
-double _drag = 0.01;
+double _dragCoef = 0.3;
 double _mass = 43.2;
-Projectile projectile(_initialVelocity, _drag, _mass);
+double _crossSection = 0.0765;
+double _temperatureK = celsiusToKelvin(0);
+//Projectile(Vec3D _initialVelocity, double _mass, double _dragCoef, double _crossSection, double _temperatureK) :
+Projectile projectile(_initialVelocity, _mass, _dragCoef, _crossSection, _temperatureK);
 
 void Sample() { projectile.Out(); };
 Sampler S(Sample,0.1);
@@ -232,12 +236,14 @@ int main(int argc, char *argv[]) {
         errorUsage();
     }
 
-    double dragConst = calculateDragConst(parameters.dragCoefficient, parameters.area, 1);
     Vec3D initialVelocity(parameters.velocity, 0.0, 0.0);
+    double tempK = celsiusToKelvin(parameters.temperature);
     initialVelocity = rotateVector(initialVelocity, parameters.angle);
-    projectile.SetDrag(dragConst);
+    projectile.SetDragCoef(parameters.dragCoefficient);
     projectile.SetInitialVelocity(initialVelocity);
     projectile.SetMass(parameters.mass);
+    projectile.SetCrossSection(parameters.area);
+    projectile.SetTemperatureK(tempK);
     SetOutput(outputFile.data());
     Init(0, 1000);    // inicializace experimentu
     SetMethod("rkf5");
