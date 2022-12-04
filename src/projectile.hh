@@ -12,11 +12,11 @@
 #include "vector.hh"
 
 // constants
-const double gravitationalAcceleration = 9.80665;// gravitational acceleration
+const double gravitationalAcceleration = 9.80665;// gravitational acceleration [m/s]
 const double molarMassOfAir = 0.0289644; // molar mass of dry air [kg/mol]
-const double universalGasConstant = 8.31423; // universal / ideal gas constant
-const double gasConstantDryAir = 287.05; // gas constant of dry air
-const double seaLevelPressure = 101325; // air pressure at sea level
+const double universalGasConstant = 8.31423; // universal / ideal gas constant [m^3 * Pa * K^-1 * mol^-1]
+const double gasConstantDryAir = 287.05; // gas constant of dry air [g/mol]
+const double seaLevelPressure = 101325; // air pressure at sea level [Pa]
 
 class Projectile : ConditionDown{
 private:
