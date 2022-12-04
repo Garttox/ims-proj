@@ -6,16 +6,16 @@
 struct Parameters {
     double angle;
     double dragCoefficient;
-    double density;
     double mass;
     double area;
+    double temperature;
     double velocity;
     void printParameters() {
         std::cout << "Angle: " << angle << std::endl;
         std::cout << "Drag coefficient: " << dragCoefficient << std::endl;
-        std::cout << "Density: " << density << std::endl;
         std::cout << "Mass: " << mass << std::endl;
         std::cout << "Area: " << area << std::endl;
+        std::cout << "Temperature: " << area << std::endl;
         std::cout << "Velocity: " << velocity << std::endl;
     }
 };
@@ -108,13 +108,13 @@ double calculateDragConst(double dragCoef, double crossSection, double airDensit
 }
 
 void usage() {
-    std::cout << "Usage: ./ims -a # -c # -d # -m # [-o filename] -s # -v #" << std::endl;
+    std::cout << "Usage: ./ims -a # -c # -m # [-o filename] -s # -t # -v #" << std::endl;
     std::cout << "-a: howitzer firing angle" << std::endl;
     std::cout << "-c: drag coefficient" << std::endl;
-    std::cout << "-d: air density" << std::endl;
     std::cout << "-m: projectile mass" << std::endl;
     std::cout << "-o: output file name" << std::endl;
     std::cout << "-s: projectile cross-section area" << std::endl;
+    std::cout << "-t: temperature" << std::endl;
     std::cout << "-v: initial projectile velocity" << std::endl;
 }
 
@@ -157,10 +157,10 @@ int main(int argc, char *argv[]) {
      * opts
      * a - howitzer firing angle
      * c - drag coefficient
-     * d - air density
      * m - projectile mass
      * o - output file name
      * s - projectile cross-section area
+     * t - temperature
      * v - initial projectile velocity
      */
     Parameters parameters;
@@ -176,10 +176,6 @@ int main(int argc, char *argv[]) {
                 parameters.dragCoefficient = handleArgument(optarg, p, opt);
                 mandatoryArgsEncountered++;
                 break;
-            case 'd':
-                parameters.density = handleArgument(optarg, p, opt);
-                mandatoryArgsEncountered++;
-                break;
             case 'm':
                 parameters.mass = handleArgument(optarg, p, opt);
                 mandatoryArgsEncountered++;
@@ -189,6 +185,10 @@ int main(int argc, char *argv[]) {
                 break;
             case 's':
                 parameters.area = handleArgument(optarg, p, opt);
+                mandatoryArgsEncountered++;
+                break;
+            case 't':
+                parameters.temperature = handleArgument(optarg, p, opt);
                 mandatoryArgsEncountered++;
                 break;
             case 'v':
@@ -220,7 +220,7 @@ int main(int argc, char *argv[]) {
         errorUsage();
     }
 
-    double dragConst = calculateDragConst(parameters.dragCoefficient, parameters.area, parameters.density);
+    double dragConst = calculateDragConst(parameters.dragCoefficient, parameters.area, 1);
     Vec3D initialVelocity(parameters.velocity, 0.0, 0.0);
     initialVelocity = rotateVector(initialVelocity, parameters.angle);
     projectile.SetDrag(dragConst);
