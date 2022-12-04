@@ -36,7 +36,7 @@ Vec3D rotateVector(Vec3D vec, double angle) {
     double radians = (M_PI / 180) * angle;
     double x2 = cos(radians) * vec.x - sin(radians) * vec.y;
     double y2 = sin(radians) * vec.x + cos(radians) * vec.y;
-    Vec3D rotatedVec = Vec3D(x2, y2, 70);
+    Vec3D rotatedVec = Vec3D(x2, y2, 0);
     vec.printVec();
     return rotatedVec;
 }
@@ -61,6 +61,7 @@ class Projectile : ConditionDown{
     Integrator vx, vy, vz, yx, yy, yz;
     //Integrator y0,y1,y2,y3,zv,zs;
     Parameter drag, mass;
+    Parameter p0x, p0y, p0z;
     Vec3D initialVelocity;
     void Action() { // projectile touched "ground"
         yy = 0; // correction
@@ -71,6 +72,9 @@ public:
     Projectile(Vec3D _initialVelocity, double _drag, double _mass) :
         ConditionDown(yy),
         mass(_mass),
+        p0x(_initialVelocity.x),
+        p0y(_initialVelocity.y),
+        p0z(_initialVelocity.z),
         //drag(0.5 * drag_coefficient * cross_section_area * air_density),
         //drag(0.5 * dragCoef * crossSection * airDensity),
         drag(_drag),
@@ -78,15 +82,18 @@ public:
         yx(vx, 0.0),
         yy(vy, 0.0),
         yz(vz, 0.0),
-        vx((-drag * Sqrt(vx*vx + vy*vy + vz*vz) * vx) / mass, initialVelocity.x),
-        vy(((-drag * Sqrt(vx*vx + vy*vy + vz*vz) * vy) / mass) - gravitationalAcceleration, initialVelocity.y),
-        vz((-drag * Sqrt(vx*vx + vy*vy + vz*vz) * vz) / mass, initialVelocity.z) {};
+        vx((-drag * Sqrt(vx*vx + vy*vy + vz*vz) * vx) / mass, p0x.Value()),
+        vy(((-drag * Sqrt(vx*vx + vy*vy + vz*vz) * vy) / mass) - gravitationalAcceleration, p0y.Value()),
+        vz((-drag * Sqrt(vx*vx + vy*vy + vz*vz) * vz) / mass, p0z.Value()) {};
     void Out() {
         //Print("%g %g %g\n", yx.Value(), yy.Value(), vx.Value());    
         Print("%g %g %g\n", yx.Value(), yz.Value(), yy.Value()); //print current position
     };
     void SetInitialVelocity(Vec3D _initialVelocity) {
-        initialVelocity = _initialVelocity;
+        //initialVelocity = _initialVelocity;
+        vx.Init(_initialVelocity.x);
+        vy.Init(_initialVelocity.y);
+        vz.Init(_initialVelocity.z);
     };
     void SetDrag(double _drag) {
         drag = _drag;
