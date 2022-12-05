@@ -32,12 +32,16 @@ struct Parameters {
     }
 };
 
+//converts temperature in celsius to kelvins
 double celsiusToKelvin(double celsius) {
     double celsiusToKelvinShift = 273.15;
     return celsius + celsiusToKelvinShift;
 }
 
-//calculations taken from https://www.calctool.org/atmospheric-thermodynamics/air-density
+/**
+ * 
+ * polynom taken from https://www.calctool.org/atmospheric-thermodynamics/air-density
+ */
 double calculateWaterVaperPressure(double tempK, double relativeHumidity) {
     double tempC = tempK - 273.15;
     double c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, p_t, E_st;
@@ -68,8 +72,8 @@ double handleArgument(char *optarg, char *p, int opt) {
 
 //default parameters
 double _angle = 45;
-double _launch_velocity = 827; // [m/s]
-Vec3D _initialVelocity = rotateVector(Vec3D(_launch_velocity, 0, 0), _angle); //
+double _launch_velocity = 827;
+Vec3D _initialVelocity = rotateVector(Vec3D(_launch_velocity, 0, 0), _angle);
 double _dragCoef = 0.3;
 double _mass = 43.2;
 double _crossSection = 0.0765;
@@ -77,10 +81,11 @@ double _temperatureK = celsiusToKelvin(0);
 double _waterVaporPressure = calculateWaterVaperPressure(_temperatureK, 0);
 Projectile projectile(_initialVelocity, _mass, _dragCoef, _crossSection, _temperatureK, _waterVaporPressure);
 
+//Prints projectile.Out() when called by Sampler
 void Sample() {
     projectile.Out(); 
 };
-Sampler S(Sample,0.1);
+Sampler S(Sample,0.05);
 
 int main(int argc, char *argv[]) {
     
@@ -164,6 +169,7 @@ int main(int argc, char *argv[]) {
         errorUsage();
     }
 
+    //set initial values for simulation from arguments
     Vec3D initialVelocity(parameters.velocity, 0.0, 0.0);
     double tempK = celsiusToKelvin(parameters.temperature);
     double waterVaporPressure = calculateWaterVaperPressure(tempK, parameters.relativeHumidity);
@@ -174,11 +180,12 @@ int main(int argc, char *argv[]) {
     projectile.SetCrossSection(parameters.area);
     projectile.SetTemperatureK(tempK);
     projectile.SetWaterVaporPressure(waterVaporPressure);
-    SetOutput(outputFile.data());
+
+    SetOutput(outputFile.data()); //set output file for 
     Init(0, 1000);    // init simulation
-    SetMethod("rkf5");
+    SetMethod("rkf5"); // set integration method
     SetAccuracy(1e-7);
-    Run();
-    Print("Konec simulace");
+    Run(); // run simulation
+    Print("#simulation ended at t = %.5g s", Time);
     return EXIT_SUCCESS;
 }
