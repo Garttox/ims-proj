@@ -1,5 +1,5 @@
 CC = g++
-CXXFLAGS = -std=c++11 -Wall
+CXXFLAGS = -std=c++11
 CXXFLAGS += -lsimlib  #simlib
 CXXFLAGS += -lm #math
 SRCFILES = src/ims.cc src/vector.cc src/projectile.cc
