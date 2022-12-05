@@ -19,7 +19,7 @@ plot3d:
 	gnuplot plot3d.plt
 
 clean:
-	@rm -r $(EXECUTABLE) $(ARCHIVE_NAME).zip
+	@rm -r $(EXECUTABLE) $(ARCHIVE_NAME).zip trajectory.dat
 
 pack:
-	zip $(ARCHIVE_NAME).zip src Makefile plot.plt plot3d.plt doc experiments README.md
+	zip -r $(ARCHIVE_NAME).zip src Makefile plot.plt plot3d.plt doc experiments README.md
