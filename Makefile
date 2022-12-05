@@ -10,7 +10,7 @@ compile:
 	@$(CC) -o $(EXECUTABLE) $(SRCFILES) $(CXXFLAGS)
 
 run: compile
-	@./$(EXECUTABLE) -a 20 -c 0.3 -m 43.2 -s 0.0765 -t 15 -v 800 -h 100
+	@./$(EXECUTABLE) -a 45 -c 0.3 -m 43.2 -s 0.0765 -t 15 -v 827 -h 100
 
 plot:
 	gnuplot plot.plt
@@ -22,4 +22,4 @@ clean:
 	@rm -r $(EXECUTABLE) $(ARCHIVE_NAME).zip
 
 pack:
-	zip $(ARCHIVE_NAME).zip src Makefile
+	zip $(ARCHIVE_NAME).zip src Makefile plot.plt plot3d.plt doc experiments README.md
